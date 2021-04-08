@@ -1,7 +1,8 @@
 #Imports defined here
 from datetime import datetime
-from blog import db, login_manager
+from blog import db, login_manager, app
 from flask_login import UserMixin
+from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 
 #Returns User query based on given ID number.
 @login_manager.user_loader
@@ -21,6 +22,19 @@ class User(db.Model, UserMixin):
     #Here, posts references the Post class. Backref creats an attribute on a Post object
     #accessed by doing Post.author
     posts = db.relationship("Post", backref="author", lazy=True)
+
+    def get_reset_token(self, expireSeconds = 1800):
+        serializer = Serializer(app.config['SECRET_KEY'], expireSeconds)
+        return serializer.dumps({"userID": self.id}).decode("utf-8")
+
+    @staticmethod
+    def verify_reset_token(token):
+        serializer = Serializer(app.config['SECRET_KEY'])
+        try:
+            userID = serializer.loads(token)['userID']
+        except:
+            return None
+        return User.query.get(userID)
 
     #User is represented as User(Username, Email, ProfileImageFile)
     def __repr__(self):
