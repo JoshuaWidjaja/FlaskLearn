@@ -1,11 +1,9 @@
-#Imports defined here
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
-from flask_login import current_user
-from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
+from flask_login import current_user
 from blog.models import User
-import email_validator
 
 #Registration Form defined here. Called when registering for a new account.
 #Required fields are: Username, email, password, confirm password
@@ -66,15 +64,6 @@ class UpdateAccountForm(FlaskForm):
             user = User.query.filter_by(email=email.data).first()
             if user:
                 raise ValidationError("Email is already taken. Please choose another one.")
-
-#Post Form defined here. Called when user creates a new post or edits an existing one
-#By default, if editing, fields are populated with current post information.
-#Required fields are: Title, Content
-#Submit button added at the bottom.
-class PostForm(FlaskForm):
-    title = StringField("Title", validators= [DataRequired()])
-    content = TextAreaField("Content", validators= [DataRequired()])
-    submit = SubmitField("Post")
 
 class RequestResetForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(),Email()])
